@@ -446,6 +446,22 @@ object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
             appCtx.putPrefString(PreferKey.ttsEngine, value)
         }
 
+    fun getTtsVoice(engine: String): String? {
+        val json = appCtx.getPrefString(PreferKey.ttsVoice)
+        return GSON.fromJsonObject<Map<String, String>>(json).getOrNull()?.get(engine)
+    }
+
+    fun setTtsVoice(engine: String, voice: String?) {
+        val json = appCtx.getPrefString(PreferKey.ttsVoice)
+        val map = GSON.fromJsonObject<MutableMap<String, String>>(json).getOrNull() ?: mutableMapOf()
+        if (voice == null) {
+            map.remove(engine)
+        } else {
+            map[engine] = voice
+        }
+        appCtx.putPrefString(PreferKey.ttsVoice, GSON.toJson(map))
+    }
+
     var webPort: Int
         get() = appCtx.getPrefInt(PreferKey.webPort, 1122)
         set(value) {

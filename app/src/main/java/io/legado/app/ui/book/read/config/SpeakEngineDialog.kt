@@ -128,15 +128,24 @@ class SpeakEngineDialog() : BaseDialogFragment(R.layout.dialog_recycler_view),
             adapter.addHeaderView {
                 ItemHttpTtsBinding.inflate(layoutInflater, recyclerView, false).apply {
                     sysTtsViews.add(cbName)
-                    ivEdit.gone()
+                    ivEdit.visible()
                     ivMenuDelete.gone()
                     labelSys.visible()
+                    // Dynamically update constraint to position ivEdit to the left of labelSys
+                    val params = ivEdit.layoutParams as androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
+                    params.rightToLeft = labelSys.id
+                    params.rightToRight = androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.UNSET
+                    ivEdit.layoutParams = params
+                    
                     cbName.text = engine.label
                     cbName.tag = engine.name
                     cbName.isChecked = GSON.fromJsonObject<SelectItem<String>>(ttsEngine)
                         .getOrNull()?.value == cbName.tag
                     cbName.setOnClickListener {
                         upTts(GSON.toJson(SelectItem(engine.label, engine.name)))
+                    }
+                    ivEdit.setOnClickListener {
+                        showDialogFragment(SystemTtsEditDialog(engine.name))
                     }
                 }
             }

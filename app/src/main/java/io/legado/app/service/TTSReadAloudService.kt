@@ -70,6 +70,22 @@ class TTSReadAloudService : BaseReadAloudService(), TextToSpeech.OnInitListener 
         if (status == TextToSpeech.SUCCESS) {
             textToSpeech?.let {
                 it.setOnUtteranceProgressListener(ttsUtteranceListener)
+                val engine = GSON.fromJsonObject<SelectItem<String>>(ReadAloud.ttsEngine).getOrNull()?.value
+                    ?: it.defaultEngine
+                if (engine != null) {
+                    val voiceName = AppConfig.getTtsVoice(engine)
+                    if (!voiceName.isNullOrEmpty()) {
+                        try {
+                            val voices = it.voices
+                            val voice = voices?.find { v -> v.name == voiceName }
+                            if (voice != null) {
+                                it.voice = voice
+                            }
+                        } catch (e: Exception) {
+                            AppLog.put("Set voice failed", e)
+                        }
+                    }
+                }
                 ttsInitFinish = true
                 play()
             }
